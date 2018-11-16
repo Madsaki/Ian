@@ -1,0 +1,107 @@
+
+module Project01(clk,rst,Load,Send,Data_in,Data_out);
+input clk,rst,Load,Send;//Load signal control button information input buffer.Send signal control button information output buffer.
+input [7:0]Data_in;// 8-bit input signal
+output reg[7:0] Data_out;//8-bit output signal 
+reg[7:0] A[1:8];//8 signal with 8 bits
+reg[3:0]k;//for loop counting
+reg [2:0]state,nstate;//state is current state, nstate is next state
+parameter S_rst=3'd0;//reset state
+parameter S_init=3'd1;//initial state
+parameter S_wait=3'd2;//wait state
+parameter S_load=3'd3;//load state
+parameter S_send=3'd4;//send state
+
+always@(posedge clk or posedge rst)
+begin
+	if(rst)//if reset=1,state is reset,otherwise state goes into next state
+		state<=S_rst;
+	else
+		state<=nstate;
+end
+
+always@(state or Load or Send or k)// the state change of FSM 
+begin
+	case(state)
+		S_rst:
+			begin
+					nstate=S_init;
+			end
+		S_init:
+					nstate=S_wait;
+		S_wait:
+			begin
+				if(Load==1'b1)//if there is "load" signal, next state will go into load state.
+					nstate=S_load;
+				else if(Send==1'b1)// if there is "send" signal, next state will go into send state.
+					nstate=S_send;
+					else nstate = S_wait;
+			end
+		S_load:
+			begin
+				if(k==4'd8)//if k=8, next state will be initial state,loop is end.Otherwise,keep looping
+					nstate=S_init;
+				else
+					nstate=S_load;
+			end
+		S_send:
+			begin
+				if(k==4'd8)
+					nstate=S_init;//if k=8, next state will be initial state,loop is end.Otherwise,keep looping
+				else
+					nstate=S_send;
+			end
+		default:
+				nstate=S_rst;//if there is a situation that does not meet the above,next state will go into reset state
+	endcase	
+end
+
+always@(posedge clk)
+begin
+	case(state)
+	S_rst: ;
+				S_init://assign k to k=0
+					begin
+						k<=4'd0;
+					end
+				S_load://if k<8,then the load state is looped,otherwise it jumps out of the loop
+					begin
+						if(k<4'd8)
+							begin
+								k<=k+1'b1;//k=k+1
+								A[1]<=Data_in;//place the entered value in the highest bit in buffer A
+								A[2]<=A[1];//shift the highest bit value in buffer A to the right by one 
+								A[3]<=A[2];//shift one bit to the right
+								A[4]<=A[3];//shift one bit to the right
+								A[5]<=A[4];//shift one bit to the right
+								A[6]<=A[5];//shift one bit to the right
+								A[7]<=A[6];//shift one bit to the right
+								A[8]<=A[7];//shift one bit to the right, six 4-bit input value are all filled with buffer.
+							   
+							
+							end
+					end
+				S_send:
+					begin
+					k<=4'd0;//set k=0
+						if(k<4'd8)//if k<8,then the send state is looped,otherwise it jumps out of the loop
+							begin
+								k<=k+1'b1;
+								A[1]<=6'd0;//place zero in the highest bit in buffer A
+								A[2]<=A[1];//shift one bit to the right
+								A[3]<=A[2];//shift one bit to the right
+								A[4]<=A[3];//shift one bit to the right
+								A[5]<=A[4];//shift one bit to the right
+								A[6]<=A[5];//shift one bit to the right
+								A[7]<=A[6];//shift one bit to the right
+								A[8]<=A[7];//shift one bit to the right
+								Data_out<=A[8];//shift the lowest bit value in buffer to the output 
+							end
+					end
+				default: ;
+			endcase
+		end	
+endmodule
+
+
+
