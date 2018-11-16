@@ -1,0 +1,68 @@
+`timescale 1ns/100ps
+module FoundationsComputerEngineering01_TB();
+reg clock,rst;
+reg[7:0] in;
+wire up,down,stay;
+FoundationsComputerEngineering01 test(.clk(clock),.reset(rst),.int(in),.Up(up),.Down(down),.Stay(stay));
+always #5 clock=~clock;
+initial
+begin
+$display($time,"Starting the simulation");
+clock=1'b0; // clock=0ns
+rst=1'b1;//reset=1
+in=8'b0;//input value=0
+#15 rst=1'b0;//reset=0 at 15ns
+#5
+$display($time,"Up=%d",up);
+$display($time,"Down=%d",down);
+$display($time,"Stay=%d",stay);
+#15 in=8'b00000001;//input value=00000001 at t=35ns
+$display($time,"Up=%d",up);
+$display($time,"Down=%d",down);
+$display($time,"Stay=%d",stay);
+#15 in=8'b00000000;//input value=0,at t=50ns
+$display($time,"Up=%d",up);
+$display($time,"Down=%d",down);
+$display($time,"Stay=%d",stay);
+#15 in=8'b00000010;//input value=00000010 at t=65ns
+$display($time,"Up=%d",up);
+$display($time,"Down=%d",down);
+$display($time,"Stay=%d",stay);
+#15 in=8'b0;//input value=0 at t=80ns
+$display($time,"Up=%d",up);
+$display($time,"Down=%d",down);
+$display($time,"Stay=%d",stay);
+#15 in=8'b00000100;//input value=00000100 at t=95ns
+$display($time,"Up=%d",up);
+$display($time,"Down=%d",down);
+$display($time,"Stay=%d",stay);
+#15 in=8'b0;//input value=0 at t=110ns
+$display($time,"Up=%d",up);
+$display($time,"Down=%d",down);
+$display($time,"Stay=%d",stay);
+#15 in=8'b00001000;//input value=00001000 at t=125ns
+$display($time,"Up=%d",up);
+$display($time,"Down=%d",down);
+$display($time,"Stay=%d",stay);
+#15 in=8'b0;//input value=0 at t=140ns
+$display($time,"Up=%d",up);
+$display($time,"Down=%d",down);
+$display($time,"Stay=%d",stay);
+#15 in=8'b00010000;//input value=00010000 at t=155ns
+$display($time,"Up=%d",up);
+$display($time,"Down=%d",down);
+$display($time,"Stay=%d",stay);
+#15 in=8'b0;//input value=0 at t=170ns
+$display($time,"Up=%d",up);
+$display($time,"Down=%d",down);
+$display($time,"Stay=%d",stay);
+#15 in=8'b00100000;//input value=00100000 at t=185ns
+$display($time,"Up=%d",up);
+$display($time,"Down=%d",down);
+$display($time,"Stay=%d",stay);
+#15 in=8'b0;//input value=0 at 200ns
+$display($time,"Up=%d",up);
+$display($time,"Down=%d",down);
+$display($time,"Stay=%d",stay);
+end
+endmodule
