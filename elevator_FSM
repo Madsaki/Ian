@@ -1,0 +1,117 @@
+module FoundationsComputerEngineering01(clk,reset,int,Up,Down,Stay);
+input clk,reset;
+input[7:0] int;//Use U1,U2,U3,D4,D3,D2 to represent 1U,2U,3U,4D,3D,2D respectively
+output reg Up,Down,Stay;// U,D,S represent Up,Down,Stay respectively
+reg[3:0] state;
+reg[3:0] nxt_state;
+//g1 = floor1,g2 = floor2,g3 = floor3,g4 = floor4
+parameter g1=4'b0001,g2=4'b0010,g3=4'b0011,g4=4'b0100;
+//g12 represents the intermediate state of floor1 and floor2, and its direction is upward.
+//g23 represents the intermediate state of floor2 and floor3, and its direction is upward.
+//g34 represents the intermediate state of floor3 and floor4, and its direction is upward.
+parameter g12=4'b0101,g23=4'b0110,g34=4'b0111;
+//g21 represents the intermediate state of floor1 and floor2, and its direction is downward.
+//g32 represents the intermediate state of floor2 and floor3, and its direction is downward.
+//g43 represents the intermediate state of floor3 and floor4, and its direction is downward.
+parameter g21=4'b1001,g32=4'b1010,g43=4'b1011;
+parameter U1=8'b00000001,U2=8'b00000010,U3=8'b00000100,D4=8'b00001000,D3=8'b00010000,D2=8'b00100000;
+
+always@(state or int)
+begin
+case (state)
+//On different floors,press different buttons and the finite state machine enters different state.
+//On the floor1,for example,press 1U,the elevator enters the floor2 or remains on the floor1.
+g1:if(int==U1)nxt_state=g12;
+//When the 2U is pressed, the elevator state enter the middle state of the floor2 and floor3.Otherwise it will stay on the floor1.
+else if(int==U2)nxt_state=g23;
+//When the 3U is pressed, the elevator state enter the middle state of the floor3 and floor4.Otherwise it will stay on the floor1.
+else if(int==U3)nxt_state=g34;
+//When the 4D is pressed, the elevator state enter the middle state of the floor4 and floor3.Otherwise it will stay on the floor1.
+else if(int==D4)nxt_state=g43;
+//When the 3D is pressed, the elevator state enter the middle state of the floor2 and floor3.Otherwise it will stay on the floor1.
+else if(int==D3)nxt_state=g32;
+//When the 2D is pressed, the elevator state enter the middle state of the floor2 and floor1.Otherwise it will stay on the floor1.
+else if(int==D2)nxt_state=g21;
+else nxt_state=g1;
+//The corresponding operations of the floor2,the floor3 and the floor4 are similar to the floor1.
+g2:if(int==U1)nxt_state=g12;
+else if(int==U2)nxt_state=g23;
+else if(int==U3)nxt_state=g34;
+else if(int==D4)nxt_state=g43;
+else if(int==D3)nxt_state=g32;
+else if(int==D2)nxt_state=g21;
+else nxt_state=g2;
+g3:if(int==U1)nxt_state=g12;
+else if(int==U2)nxt_state=g23;
+else if(int==U3)nxt_state=g34;
+else if(int==D4)nxt_state=g43;
+else if(int==D3)nxt_state=g32;
+else if(int==D2)nxt_state=g21;
+else nxt_state=g3;
+g4:if(int==U1)nxt_state=g12;
+else if(int==U2)nxt_state=g23;
+else if(int==U3)nxt_state=g34;
+else if(int==D4)nxt_state=g43;
+else if(int==D3)nxt_state=g32;
+else if(int==D2)nxt_state=g21;
+else nxt_state=g4;
+g12:
+//if(int==U1)
+nxt_state=g2;
+g23:
+//if(int==U2)
+nxt_state=g3;
+g34:
+//if(int==U3)
+nxt_state=g4;
+g43:
+//if(int==D4)
+nxt_state=g3;
+g32:
+//if(int==D3)
+nxt_state=g2;
+g21:
+//if(int==D2)
+nxt_state=g1;
+endcase
+end
+
+always@(posedge clk)
+begin
+// If the reset signal is triggered, the evevator returns to the floor1.
+// Otherwise the floor state of the elevator will enter the next state.
+if(reset)state<=g1;
+else state<=nxt_state;
+end
+
+always@(state or int)//output signal
+begin
+Up=0;
+Down=0;
+Stay=0;
+//If one of the buttons 1U,2U,3U,2D,3D,4D is pressed when the elevator is on the floor1,the evelator displays the direction upwards.
+if((state==g1)&&(int==U1||int==U2||int==U3||int==D4||int==D3||int==D2))Up=1;
+//If one of the buttons 2U,3U,3D,4D is pressed when the elevator is on the floor2,the evelator displays the direction upwards.
+else if((state==g2)&&(int==U2||int==U3||int==D4||int==D3))Up=1;
+//If one of the buttons 1U,2D is pressed when the elevator is on the floor2,the evelator displays the direction downwards.
+else if((state==g2)&&(int==U1||int==D2))Down=1;
+//If one of the buttons 3U,4D is pressed when the elevator is on the floor3,the evelator displays the direction upwards.
+else if((state==g3)&&(int==U3||int==D4))Up=1;
+//If one of the buttons 1U,2U,2D,3D is pressed when the elevator is on the floor3,the evelator displays the direction downwards.
+else if((state==g3)&&(int==U1||int==U2||int==D3||int==D2))Down=1;
+//If one of the buttons 1U,2U,3U,2D,3D,4D is pressed when the elevator is on the floor4,the evelator displays the direction downwards.
+else if((state==g4)&&(int==U1||int==U2||int==U3||int==D4||int==D3||int==D2))Down=1;
+//If the state is g12 or g23 or g34,the direction is always up
+else if(state==g12)Up=1;
+else if(state==g23)Up=1;
+else if(state==g34)Up=1;
+//If the state is g43 or g32 or g21,the direction is always down
+else if(state==g43)Down=1;
+else if(state==g32)Down=1;
+else if(state==g21)Down=1;
+else Stay=1;
+end
+endmodule
+
+
+
