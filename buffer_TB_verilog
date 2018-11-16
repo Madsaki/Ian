@@ -1,0 +1,39 @@
+`timescale 1 ns/ 1 ps
+module Project01_TB();
+reg [7:0]Data_in;
+reg Load;
+reg Send;
+reg clk;
+reg rst;
+wire [7:0]Data_out;
+Project01 i1 (
+	.Data_in(Data_in),
+	.Data_out(Data_out),
+	.Load(Load),
+	.Send(Send),
+	.clk(clk),
+	.rst(rst)
+);
+initial   
+begin 
+Data_in=8'd0; //input value =0
+clk=1'b0;//clock=0
+forever #10 clk=~clk;       
+$display("Running testbench");
+end     
+initial 
+begin
+rst=1'b1;Load=1'b0;Send=1'b0;//reset =1,load signal=0,send signal=0
+#100 rst=1'b0;Load=1'b1;//at t=100ns,reset=0,load signal=1,the input value begins to be input to the buffer
+#60 Data_in=8'b00000001;//at t=160ns,input value=00000001
+#20 Data_in=8'b00000010;//at t=180ns,input value=00000010
+#20 Data_in=8'b00000100;//at t=200ns,input value=00000100
+#20 Data_in=8'b00001000;//at t=220ns,input value=00001000
+#20 Data_in=8'b00010000;//at t=240ns,input value=00010000
+#20 Data_in=8'b00100000;//at t=260ns,input value=00100000
+#20 Data_in=8'b01000000;//at t=280ns,input value=01000000
+#20 Data_in=8'b10000000;//at t=300ns,input value=10000000
+#20 Load=1'b0;//at t=320ns,load siganl=0,send signal=1, the value in buffer starts to output
+Send=1'b1;
+end 
+endmodule
